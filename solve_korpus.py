@@ -90,7 +90,23 @@ class ProcessKorpus:
                     pass
         print('Berapa kali kata "jakarta" muncul dalam seluruh korpus baik dalam huruf besar maupun kecil? {0} kali'.format(totalJakarta))
     
+    def __answerNumberSeven(self):
+        totalSentences = 0
+        for key, value in self.__listDoc.items():
+            for items in value:
+                for sentence in items['TEXT'].split('. '):
+                    if "metro jaya" in sentence.lower():
+                        totalSentences += 1
+
+        print('Berapa jumlah kalimat yang mengandung kata "metro jaya"? {0}'.format(totalSentences))
     
+    def __answerNumberEight(self):
+        highFreqWords = {}
+        for key, value in self.__listDoc.items():
+            for items in value:
+                for key, value in value['freqWords'].items():
+                    
+
     def answerSectionA(self):
         print("Section A: \n")
         for key, value in self.__listDoc.items():
@@ -104,20 +120,8 @@ class ProcessKorpus:
     def answerSectionB(self):
         print("Section B: \n")
         self.__answerNumberSix()
-    
-    def __getSentence(self, sentences):
-        #st = [sentence for docs in sentences for sentence in docs.split(" ") if re.match("^.*?[a-zA-Z].*?$", sentence)]
-        st = []
-        allSt = []
-        for docs in sentences:
-            for sentence in docs['TEXT'].split(". "):
-                if re.match("^.*?[a-zA-Z].*?$", sentence):
-                    st.append(sentence)
-            allSt.append(st)
-            st = []
+        self.__answerNumberSeven()
         
-        return allSt
-    
     def __cleanWord(self, word):
         if word == "":
             return word
@@ -136,6 +140,18 @@ class ProcessKorpus:
             
         return word.lower()
     
+    def __getSentence(self, korpus):
+        #st = [sentence for docs in sentences for sentence in docs.split(" ") if re.match("^.*?[a-zA-Z].*?$", sentence)]
+        st = []
+        allSt = []
+        for docs in korpus:
+            for sentence in docs['TEXT'].split(". "):
+                st.append(sentence)
+            allSt.append(st)
+            st = []
+        
+        return allSt
+
     def __getFreshWordPerKorpus(self):
         for key, value in self.__listDoc.items():
             for items in value:
@@ -145,10 +161,7 @@ class ProcessKorpus:
                     if wordCleaning != "":
                         words.append(wordCleaning)
                 self.__listDoc[key][value.index(items)]['words'] = words
-    
-    def __insert(self, source_str, insert_str, pos):
-        return source_str[:pos] + insert_str + source_str[pos:]
-    
+        
     def __frequentWords(self):
         for key, value in self.__listDoc.items():
             for items in value:
