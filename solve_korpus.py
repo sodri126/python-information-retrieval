@@ -1,10 +1,6 @@
-from bs4 import BeautifulSoup
 import os
-from nltk.tokenize import sent_tokenize
 import re
-import nltk
 
-#te
 class ProcessKorpus:
     def __init__(self, fileDirectory):
         self.__fileDirectory = fileDirectory
@@ -16,26 +12,40 @@ class ProcessKorpus:
         listKorpus = {}
         for korpus in os.listdir(self.__fileDirectory):
             fullPath = self.__fileDirectory + korpus
-            with open(fullPath, "r") as f:
-                xmlstr = "<root>{0}</root>".format(f.read())
-                xmlObject = BeautifulSoup(xmlstr, "xml")
-            
-            listKorpus[korpus] = xmlObject
+            f = open(fullPath, "r+")
+            listKorpus[korpus] = f.read()
+            f.close()
         return listKorpus
-    
+
     def __allDocIntoDictionary(self):
         self.__listDoc = {}
         for key, value in self.__processKorpusOneByOne().items():
             self.__listDoc[key] = []
-            for tag in value.find_all('DOC'):
-                txtClean = str(tag.TEXT).replace("<TEXT>", "").replace("</TEXT>", "").replace("\n", " ").strip()
-                self.__listDoc[key].append(dict(DOCID= tag.DOCID.text.strip(),
-                        DOCNO=tag.DOCNO.text.strip(),
-                        SO=tag.SO.text.strip(),
-                        SECTION=tag.SECTION.text.strip(),
-                        DATE=tag.DATE.text.strip(),
-                        TITLE=tag.TITLE.text.strip(),
-                        TEXT=txtClean))
+            getAllDoc = re.findall(r"\<DOC\>(.+?)\<\/DOC\>", value.replace("\n", " "))
+            for doc in getAllDoc:
+                docid = self.__getTextFromTag('DOCID', doc).strip()
+                docno = self.__getTextFromTag('DOCNO', doc).strip()
+                so = self.__getTextFromTag('SO', doc).strip()
+                section = self.__getTextFromTag('SECTION', doc).strip()
+                date = self.__getTextFromTag('DATE', doc).strip()
+                title = self.__getTextFromTag('TITLE', doc).strip()
+                txt = self.__getTextFromTag('TEXT', doc).strip()
+                
+                self.__listDoc[key].append(dict(DOCID= docid,
+                    DOCNO=docno,
+                    SO=so,
+                    SECTION=section,
+                    DATE=date,
+                    TITLE=title,
+                    TEXT=txt))
+    
+    def __getTextFromTag(self, tag, txt):
+        formatRegex = r'\<{0}\>(.+?)\</{0}\>'.format(tag)
+        se = re.search(formatRegex, txt)
+        if se:
+            return se.group(1)
+        else:
+            return ""
 
     def __answerNumberOne(self, korpus):
         totalDoc = len(korpus)
@@ -70,7 +80,19 @@ class ProcessKorpus:
                     totalMoreThanTwoWords += 1
         print("Ada berapa jumlah kata yang memiliki frekuensi lebih dari 1 dalam korpus? {0}".format(totalMoreThanTwoWords))
     
+    def __answerNumberSix(self):
+        totalJakarta = 0
+        for key, value in self.__listDoc.items():
+            for items in value:
+                try:
+                    totalJakarta = totalJakarta + items['freqWords']['jakarta']
+                except:
+                    pass
+        print('Berapa kali kata "jakarta" muncul dalam seluruh korpus baik dalam huruf besar maupun kecil? {0} kali'.format(totalJakarta))
+    
+    
     def answerSectionA(self):
+        print("Section A: \n")
         for key, value in self.__listDoc.items():
             print(key)
             self.__answerNumberOne(value)
@@ -78,6 +100,10 @@ class ProcessKorpus:
             self.__answerNumberThree(value) 
             self.__answerNumberFour(value) 
             self.__answerNumberFive(value)
+    
+    def answerSectionB(self):
+        print("Section B: \n")
+        self.__answerNumberSix()
     
     def __getSentence(self, sentences):
         #st = [sentence for docs in sentences for sentence in docs.split(" ") if re.match("^.*?[a-zA-Z].*?$", sentence)]
@@ -138,5 +164,4 @@ class ProcessKorpus:
 if __name__ == "__main__":
     processKorpus = ProcessKorpus("korpus/")
     processKorpus.answerSectionA()
-    #print(processKorpus.allDocIntoDictionary())
-    #processKorpus.answerEachKorpus()
+    processKorpus.answerSectionB()
