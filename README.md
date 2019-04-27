@@ -1,2 +1,2 @@
 # python-information-retrieval
-For 
+For education only 
