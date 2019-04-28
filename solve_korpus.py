@@ -126,14 +126,14 @@ class ProcessKorpus:
         print()
     
     def __answerNumberTen(self):
-        highestWord = 0
-        for key, value in self.__listDoc.items():
-            for items in value:
-                if items['totalWords'] > highestWord:
-                    highestWord = items['totalWords']
-                    korpus = items
+        allKorpus = [items for key, value in self.__listDoc.items() for items in value]
+        korpusHighest = allKorpus[0]
+
+        for items in allKorpus[1:]:
+            if items['totalWords'] > korpusHighest['totalWords']:
+                korpusHighest = items
         
-        print("Dokumen mana yang memiliki jumlah kata terbanyak (tuliskan no dokumennya dan jumlah katanya)? Nomor dokumen: {0}, Total kata: {1}".format(korpus['DOCNO'], korpus['totalWords']))
+        print("Dokumen mana yang memiliki jumlah kata terbanyak (tuliskan no dokumennya dan jumlah katanya)? Nomor dokumen: {0}, Total kata: {1}".format(korpusHighest['DOCNO'], korpusHighest['totalWords']))
     
     def __answerNumberEleven(self):
         allKorpus = [items for key, value in self.__listDoc.items() for items in value]
