@@ -7,6 +7,7 @@ class ProcessKorpus:
         self.__allDocIntoDictionary()
         self.__getFreshWordPerKorpus()
         self.__frequentWords()
+        self.__allFreqWordsIntoOne()
 
     def __processKorpusOneByOne(self):
         listKorpus = {}
@@ -101,11 +102,64 @@ class ProcessKorpus:
         print('Berapa jumlah kalimat yang mengandung kata "metro jaya"? {0}'.format(totalSentences))
     
     def __answerNumberEight(self):
-        highFreqWords = {}
+        highFreqWords = sorted(self.__allFreqWords, key=lambda x: (-self.__allFreqWords[x], x))
+        print("Tuliskan 10 kata yang paling banyak muncul dari keseluruhan korpus?")
+        print("Jawaban: ", end='')
+        for item in highFreqWords[0:10]:
+            print("{0}: {1}".format(item, self.__allFreqWords[item]), end=', ')
+        print()
+    
+    def __answerNumberNine(self):
+        highFreqWords = sorted(self.__allFreqWords, key=lambda x: (-self.__allFreqWords[x], x))
+        highFreqWordsWithPrefixMe = []
+        for item in highFreqWords:
+            if len(highFreqWordsWithPrefixMe) >= 10:
+                break
+
+            if item.startswith('me'):
+                highFreqWordsWithPrefixMe.append(item)
+        
+        print('Tuliskan 10 kata dengan prefiks "me-" yang memiliki frekuensi paling tinggi dari seluruh korpus?')
+        print("Jawaban: ", end='')
+        for item in highFreqWordsWithPrefixMe:
+            print("{0}: {1}".format(item, self.__allFreqWords[item]), end=', ')
+        print()
+    
+    def __answerNumberTen(self):
+        highestWord = 0
         for key, value in self.__listDoc.items():
             for items in value:
-                for key, value in value['freqWords'].items():
-                    
+                if items['totalWords'] > highestWord:
+                    highestWord = items['totalWords']
+                    korpus = items
+        
+        print("Dokumen mana yang memiliki jumlah kata terbanyak (tuliskan no dokumennya dan jumlah katanya)? Nomor dokumen: {0}, Total kata: {1}".format(korpus['DOCNO'], korpus['totalWords']))
+    
+    def __answerNumberEleven(self):
+        allKorpus = [items for key, value in self.__listDoc.items() for items in value]
+        korpusLowest = allKorpus[0]
+
+        for items in allKorpus[1:]:
+            if items['totalWords'] < korpusLowest['totalWords']:
+                korpusLowest = items
+
+        print("Dokumen mana yang memiliki jumlah kata paling sedikit (tuliskan no dokumennya dan jumlah katanya)? Nomor dokumen: {0}, Total kata: {1}".format(korpusLowest['DOCNO'], korpusLowest['totalWords']))
+    def __answerNumberThirTeen(self):
+        isBreak = False
+        for key, value in self.__listDoc.items():
+            for items in value:
+                if items['DOCNO'] == 'KMP032201-00001':
+                    korpus = items
+                    isBreak = True
+                    break
+            if isBreak:
+                break
+        highFreqsWord = sorted(korpus['freqWords'], key=lambda x: (-korpus['freqWords'][x], x)) 
+        print("Lihat berita dengan nomor dokumen KMP032201-0001, tentukan 10 kata yang mewakili topik pada artikel tersebut menggunakan informasi frekuensi kata.")
+        print("Jawaban: ", end='')
+        for item in highFreqsWord[0:10]:
+            print("{0}: {1}".format(item, korpus['freqWords'][item]), end=', ')
+        print()
 
     def answerSectionA(self):
         print("Section A: \n")
@@ -121,6 +175,11 @@ class ProcessKorpus:
         print("Section B: \n")
         self.__answerNumberSix()
         self.__answerNumberSeven()
+        self.__answerNumberEight()
+        self.__answerNumberNine()
+        self.__answerNumberTen()
+        self.__answerNumberEleven()
+        self.__answerNumberThirTeen()
         
     def __cleanWord(self, word):
         if word == "":
@@ -167,11 +226,17 @@ class ProcessKorpus:
             for items in value:
                 freqWords = {}
                 for word in items['words']:
-                    if word in freqWords:
-                        freqWords[word] += 1
-                    else:
-                        freqWords[word] = 1
+                    freqWords[word] = freqWords.get(word, 0) + 1
                 self.__listDoc[key][value.index(items)]['freqWords'] = freqWords
+                self.__listDoc[key][value.index(items)]['totalWords'] = sum(freqWords.values())
+    
+    def __allFreqWordsIntoOne(self):
+        self.__allFreqWords = {}
+        
+        for key, value in self.__listDoc.items():
+            for items in value:
+                for nameitem, val in items['freqWords'].items():
+                    self.__allFreqWords[nameitem] = self.__allFreqWords.get(nameitem, 0) + val
 
 
 if __name__ == "__main__":
