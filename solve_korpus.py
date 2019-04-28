@@ -1,5 +1,6 @@
 import os
 import re
+import matplotlib.pyplot as plt
 
 class ProcessKorpus:
     def __init__(self, fileDirectory):
@@ -57,7 +58,7 @@ class ProcessKorpus:
         sentences = self.__getSentence(korpus)  
         totalSentences = list(map(lambda s: len(s), sentences))
         averageSentences = sum(totalSentences) / len(totalSentences)      
-        print("Berapa jumlah kalimat rata-rata untuk setiap dokumen berita pada korpus? {0}".format(averageSentences))
+        print("Berapa jumlah kalimat rata-rata untuk setiap dokumen berita pada korpus? {0}".format(round(averageSentences)))
     
     def __answerNumberThree(self, korpus):
         #totalUniqueWords = len(list(filter(lambda value: value['freqWords'][1] == 1, korpus)))
@@ -66,12 +67,12 @@ class ProcessKorpus:
             for key, value in items['freqWords'].items():
                 if value == 1:
                     totalUniqueWords += 1
-        print("Berapa jumlah kata unik yang terdapat dalam korpus? {0}".format(totalUniqueWords))
+        print("Berapa jumlah kata unik yang terdapat dalam korpus? {0} kata unik".format(totalUniqueWords))
     
     def __answerNumberFour(self, korpus):
         totalWords = [value for items in korpus for key, value in items['freqWords'].items()]
         averageWords = sum(totalWords) / len(totalWords)
-        print("Berapa rata-rata frekuensi kata dari setiap dokumen berita pada korpus? {0}".format(averageWords))
+        print("Berapa rata-rata frekuensi kata dari setiap dokumen berita pada korpus? {0}".format(round(averageWords)))
     
     def __answerNumberFive(self, korpus):
         totalMoreThanTwoWords = 0
@@ -79,7 +80,7 @@ class ProcessKorpus:
             for key, value in items['freqWords'].items():
                 if value > 1:
                     totalMoreThanTwoWords += 1
-        print("Ada berapa jumlah kata yang memiliki frekuensi lebih dari 1 dalam korpus? {0}".format(totalMoreThanTwoWords))
+        print("Ada berapa jumlah kata yang memiliki frekuensi lebih dari 1 dalam korpus? {0} kata".format(totalMoreThanTwoWords))
     
     def __answerNumberSix(self):
         totalJakarta = 0
@@ -142,8 +143,24 @@ class ProcessKorpus:
         for items in allKorpus[1:]:
             if items['totalWords'] < korpusLowest['totalWords']:
                 korpusLowest = items
-
+        
         print("Dokumen mana yang memiliki jumlah kata paling sedikit (tuliskan no dokumennya dan jumlah katanya)? Nomor dokumen: {0}, Total kata: {1}".format(korpusLowest['DOCNO'], korpusLowest['totalWords']))
+    
+    def __answerNumberTwelve(self):
+        words = sorted(self.__allFreqWords, key=lambda x: (-self.__allFreqWords[x], x))
+        y = []
+        for item in words:
+            y.append(self.__allFreqWords[item])
+        
+        x = [i for i in range(1, len(y)+1)]
+        plt.scatter(x, y, label='Daftar kata', color='r')
+        plt.xlabel('Rank')
+        plt.ylabel('Frequent')
+        plt.title('Distribusi kata')
+        plt.legend()
+        plt.show()
+
+        
     def __answerNumberThirTeen(self):
         isBreak = False
         for key, value in self.__listDoc.items():
@@ -179,6 +196,7 @@ class ProcessKorpus:
         self.__answerNumberNine()
         self.__answerNumberTen()
         self.__answerNumberEleven()
+        self.__answerNumberTwelve()
         self.__answerNumberThirTeen()
         
     def __cleanWord(self, word):
